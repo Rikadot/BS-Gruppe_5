@@ -1,0 +1,3 @@
+/root/BS/cmake-build-bs/CMakeFiles/rebuild_cache.dir
+/root/BS/cmake-build-bs/CMakeFiles/Test.dir
+/root/BS/cmake-build-bs/CMakeFiles/edit_cache.dir

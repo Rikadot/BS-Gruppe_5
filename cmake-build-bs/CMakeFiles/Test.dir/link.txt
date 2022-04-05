@@ -1,0 +1,1 @@
+/usr/bin/cc -g   CMakeFiles/Test.dir/main.c.o CMakeFiles/Test.dir/functions.c.o CMakeFiles/Test.dir/server.c.o  -o Test 

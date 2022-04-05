@@ -1,0 +1,44 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/root/BS/functions.c
+stdio.h
+-
+string.h
+-
+ctype.h
+-
+functions.h
+/root/BS/functions.h
+
+/root/BS/functions.h
+
+/root/BS/main.c
+server.h
+/root/BS/server.h
+
+/root/BS/server.c
+stdio.h
+-
+stdlib.h
+-
+sys/socket.h
+-
+netinet/in.h
+-
+string.h
+-
+unistd.h
+-
+server.h
+/root/BS/server.h
+functions.h
+/root/BS/functions.h
+
+/root/BS/server.h
+
