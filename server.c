@@ -81,7 +81,7 @@ int startServer() {
     keyValueData = shmat(id,0,0);
 
     //For fork (Multiple clients)
-    int pid;
+    int pid = 1;
 
 
 
@@ -119,17 +119,10 @@ int startServer() {
     fflush(0);
 
     while (1) {
-        if(pid == 0){
-            printf("Child ended connection.\n");
-            fflush(0);
-            close(server_fd);
-            break;
-        }
         socklen_t client_len = sizeof(client);
         //Server accepts new incoming connection
         client_fd = accept(server_fd, (struct sockaddr *) &client, &client_len);
         pid = fork();
-        printf("Testing ----------------%i\n",pid);
         if(pid < 0){
             printf("Could not create a new thread!\n");
             fflush(0);
@@ -138,7 +131,6 @@ int startServer() {
 
         //Child Process
         if(pid == 0) {
-
             if (client_fd < 0) {
                 printf("Could not establish new connection!\n");
                 fflush(0);
@@ -236,7 +228,7 @@ int startServer() {
                         if (strcmp(param[0], "QUIT") == 0) {
                             send(client_fd, end_message, strlen(end_message), 0);
                             fflush(0);
-                            close(client_fd);
+                            shutdown(client_fd,SHUT_RDWR);
                             break;
                         } else
 
