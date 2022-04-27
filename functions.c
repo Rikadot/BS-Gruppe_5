@@ -69,7 +69,7 @@ int get(char* key, char* res,KeyValueData * keyValueDataArray){
 int del(char* key,KeyValueData * keyValueDataArray){
     for(int i = 0; i < ARRAY_SIZE;i++) {
         if (strcmp(keyValueDataArray[i].key, key) == 0) {
-            printf("Key found an deleted\n");
+            printf("Key found and deleted.\n");
             fflush(0);
             strcpy(keyValueDataArray[i].key,"\0");
             strcpy(keyValueDataArray[i].value,"\0");
