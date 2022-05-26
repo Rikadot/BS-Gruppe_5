@@ -46,7 +46,6 @@ int put(char * key, char * value, KeyValueData * keyValueDataArray){
             return 1;
         }
     }
-
     printf("An error occurred!\n");
     fflush(0);
     return -1;
@@ -80,4 +79,29 @@ int del(char* key,KeyValueData * keyValueDataArray){
     fflush(0);
     return -1;
 }
+
+int addToList(int pid, char * key, Subscriber *subscriber){
+
+    //Search for existing key
+    for(int i = 0; i < ARRAY_SIZE;i++){
+        if(subscriber[i].pid == pid){
+            strcpy(subscriber[i].keys, strcat(strcat(subscriber[i].keys,key),","));
+            return 0;
+        }
+    }
+
+    //Next free space, where pid < 0
+    for(int i = 0; i < ARRAY_SIZE;i++){
+        if(subscriber[i].pid == 0){
+            subscriber[i].pid = pid;
+            strcpy(subscriber[i].keys,strcat(key,","));
+            return 1;
+        }
+    }
+
+    printf("An error occurred!\n");
+    fflush(0);
+    return -1;
+}
+
 

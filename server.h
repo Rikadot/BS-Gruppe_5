@@ -7,5 +7,5 @@
 
 #define BUFFER_SIZE 128
 
-int startServer();
+_Noreturn int startServer();
 #endif //TEST_SERVER_H
