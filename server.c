@@ -17,8 +17,6 @@
 
 KeyValueData *keyValueData;
 
-Subscriber *subscriber;
-
 #define MAX_PARAMS 3
 
 //Command
@@ -88,9 +86,7 @@ _Noreturn int startServer() {
     char *double_space_message = "\rYou cannot put more then one space, behind each other.\r\n";
 
     //Shared Memory Sub
-    sharedMemoryId2 = shmget(IPC_PRIVATE, sizeof (Subscriber) * ARRAY_SIZE, IPC_CREAT | 0777);
     exitWhenError(sharedMemoryId2,"Could not create shared memory\n");
-    subscriber = shmat(sharedMemoryId2,0,0);
 
     //Shared Memory
     sharedMemoryId = shmget(IPC_PRIVATE, sizeof(KeyValueData) * ARRAY_SIZE, IPC_CREAT | 0777);
@@ -251,15 +247,17 @@ _Noreturn int startServer() {
                                 Message publishMessage;
                                 publishMessage.mtype = -1;
 
-                                for(int i = 0; i < ARRAY_SIZE; i++) {
-                                    if (strstr(subscriber[i].keys,param[1]) != NULL) {
-                                        publishMessage.mtype = subscriber[i].pid;
-                                        strcpy(publishMessage.mtext, message);
-                                        if (msgsnd(messageQueueId, &publishMessage, 100, 0) < 0) {
-                                            perror("Failed to send message in queue.");
-                                            exit(-1);
-                                        }
+                                char str[STRING_LENGTH];
+                                strcpy(str,keyValueData[command_error].subscriberList);
+                                char *ptr = strtok(str, ",");
+                                while(ptr != NULL) {
+                                    publishMessage.mtype = strtol(ptr, (char**)NULL, 10);
+                                    strcpy(publishMessage.mtext, message);
+                                    if (msgsnd(messageQueueId, &publishMessage, 100, 0) < 0) {
+                                        perror("Failed to send message in queue.");
+                                        exit(-1);
                                     }
+                                    ptr = strtok(NULL, ",");
                                 }
                                 //_____________________________________________________________
                             } else
@@ -267,7 +265,7 @@ _Noreturn int startServer() {
                                 //GET Command
                             if (strcmp(param[0], "GET") == 0) {
                                 command_error = get(param[1], temp, keyValueData);
-                                if (command_error == -1) {
+                                if (command_error == -1 || strcmp(temp, "\0")) {
                                     sprintf(message, "GET:Key %s:key_nonexistent\n\r"
                                                      "This key does not exist.\n\r", param[1]);
                                 } else {
@@ -293,15 +291,17 @@ _Noreturn int startServer() {
                                 Message publishMessage;
                                 publishMessage.mtype = -1;
 
-                                for(int i = 0; i < ARRAY_SIZE; i++) {
-                                    if (strstr(subscriber[i].keys,param[1]) != NULL) {
-                                        publishMessage.mtype = subscriber[i].pid;
-                                        strcpy(publishMessage.mtext, message);
-                                        if (msgsnd(messageQueueId, &publishMessage, 100, 0) < 0) {
-                                            perror("Failed to send message in queue.");
-                                            exit(-1);
-                                        }
+                                char str[STRING_LENGTH];
+                                strcpy(str,keyValueData[command_error].subscriberList);
+                                char *ptr = strtok(str, ",");
+                                while(ptr != NULL) {
+                                    publishMessage.mtype = strtol(ptr, (char**)NULL, 10);
+                                    strcpy(publishMessage.mtext, message);
+                                    if (msgsnd(messageQueueId, &publishMessage, 100, 0) < 0) {
+                                        perror("Failed to send message in queue.");
+                                        exit(-1);
                                     }
+                                    ptr = strtok(NULL, ",");
                                 }
                                 //_____________________________________________________________
                             } else
@@ -320,16 +320,27 @@ _Noreturn int startServer() {
                                 break;
                             } else
 
+                                //SUB Command
                             if(strcmp(param[0], "SUB") == 0){
-                                sprintf(message, "Subscribed to %s.\n\r",param[1]);
-                                send(client_fd, message, strlen(message), 0);
-                                addToList(getpid(),param[1],subscriber);
+                                int feedback = addToList(getpid(),param[1], keyValueData);
                                 for(int i = 0; i < ARRAY_SIZE; i++) {
-                                    if (subscriber[i].pid != 0) {
-                                        printf("PID %i\n", subscriber[i].pid);
-                                        printf("Keys %s\n", subscriber[i].keys);
+                                    if(strcmp(keyValueData[i].key, param[1])){
+                                        char str[STRING_LENGTH];
+                                        strcpy(str,keyValueData[i].subscriberList);
+                                        char * ptr = strtok(str, ",");
+                                        printf("%s", ptr);
+                                        while (ptr != NULL) {
+                                            ptr = strtok(NULL, ",");
+                                            printf("%s", ptr);
+                                        }
                                     }
                                 }
+                                switch (feedback) {
+                                    case 0: sprintf(message, "Subscribed to %s.\n\r",param[1]); break;
+                                    case -2: sprintf(message, "User already subscribed to %s.\n\r",param[1]); break;
+                                    default: sprintf(message, "An Error has occurred.\n\r",param[1]);
+                                }
+                                send(client_fd, message, strlen(message), 0);
                             } else
                                 //Help Command
                             if (strcmp(param[0], "HELP") == 0) {
@@ -402,3 +413,5 @@ int commandParam(char *input, char *splitchar, char **param, int size) {
     }
     return (i);
 }
+
+

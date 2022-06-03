@@ -11,16 +11,12 @@
 typedef struct KeyValueData {
     char key[STRING_LENGTH];
     char value[STRING_LENGTH];
+    char subscriberList[STRING_LENGTH]
 } KeyValueData;
-
-typedef struct Subscriber {
-    int pid;
-    char keys[STRING_LENGTH];
-} Subscriber;
 
 int put(char * key, char * value,KeyValueData * keyValueDataArray);
 int get(char* key, char* res,KeyValueData * keyValueDataArray);
 int del(char* key,KeyValueData * keyValueDataArray);
-int addToList(int pid, char * key, Subscriber *subscriber);
+int addToList(int pid, char * key, KeyValueData *keyValueDataArray);
 
 #endif //TEST_FUNCTIONS_H

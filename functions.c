@@ -6,7 +6,7 @@
 #include <ctype.h>
 #include "functions.h"
 
-//Insert key and theirs values in the array
+//Insert key and theirs values in the array returns index of inserted value
 int put(char * key, char * value, KeyValueData * keyValueDataArray){
 
     //Check if key contains special chars or empty space
@@ -30,7 +30,7 @@ int put(char * key, char * value, KeyValueData * keyValueDataArray){
             printf("There is an entry with this key.\n");
             fflush(0);
             strcpy(keyValueDataArray[i].value,value);
-            return 0;
+            return i;
         }
     }
 
@@ -38,12 +38,13 @@ int put(char * key, char * value, KeyValueData * keyValueDataArray){
     KeyValueData temp;
     strcpy(temp.key,key);
     strcpy(temp.value, value);
+    strcpy(temp.subscriberList, "");
     for(int i = 0; i < ARRAY_SIZE;i++){
         if(strcmp(keyValueDataArray[i].key,"\0") == 0){
             printf("New entry created.\n");
             fflush(0);
             keyValueDataArray[i] = temp;
-            return 1;
+            return i;
         }
     }
     printf("An error occurred!\n");
@@ -72,6 +73,7 @@ int del(char* key,KeyValueData * keyValueDataArray){
             fflush(0);
             strcpy(keyValueDataArray[i].key,"\0");
             strcpy(keyValueDataArray[i].value,"\0");
+            strcpy(keyValueDataArray[i].subscriberList,"\0");
             return 0;
         }
     }
@@ -80,26 +82,35 @@ int del(char* key,KeyValueData * keyValueDataArray){
     return -1;
 }
 
-int addToList(int pid, char * key, Subscriber *subscriber){
+int addToList(int pid, char * key, KeyValueData *keyValueDataArray){
 
-    //Search for existing key
-    for(int i = 0; i < ARRAY_SIZE;i++){
-        if(subscriber[i].pid == pid){
-            strcpy(subscriber[i].keys, strcat(strcat(subscriber[i].keys,key),","));
-            return 0;
+    int found = 0;
+    int index = -1;
+    //find key in ValueStore and append pid to Subscriber List
+    for(int i = 0; i < ARRAY_SIZE; i++){
+        if(strcmp(keyValueDataArray[i].key, key) == 0){
+            index = i;
+            found = 1;
+            char str[12];
+            sprintf(str, "%d", pid);
+            if(strstr(keyValueDataArray[i].subscriberList, str)){
+                printf("User already subscribed!");
+                return -2;
+            }
+            break;
         }
     }
-
-    //Next free space, where pid < 0
-    for(int i = 0; i < ARRAY_SIZE;i++){
-        if(subscriber[i].pid == 0){
-            subscriber[i].pid = pid;
-            strcpy(subscriber[i].keys,strcat(key,","));
-            return 1;
-        }
+    if(found == 0){
+        index = put(key, "\0", keyValueDataArray);
     }
 
-    printf("An error occurred!\n");
+    if(index>=0){
+        char str[12];
+        sprintf(str, "%d", pid);
+        strcat(keyValueDataArray[index].subscriberList, strcat(str, ","));
+        return 0;
+    }
+    printf("An Error occurred!\n");
     fflush(0);
     return -1;
 }
