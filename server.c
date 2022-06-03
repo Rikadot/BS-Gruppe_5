@@ -85,9 +85,6 @@ _Noreturn int startServer() {
     char *end_message = "Bye from the KeyValue-Store Server.\r\n";
     char *double_space_message = "\rYou cannot put more then one space, behind each other.\r\n";
 
-    //Shared Memory Sub
-    exitWhenError(sharedMemoryId2,"Could not create shared memory\n");
-
     //Shared Memory
     sharedMemoryId = shmget(IPC_PRIVATE, sizeof(KeyValueData) * ARRAY_SIZE, IPC_CREAT | 0777);
     exitWhenError(sharedMemoryId, "Could not create shared memory\n");
